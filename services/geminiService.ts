@@ -69,7 +69,10 @@ export const analyzeImage = async (base64Image: string, mimeType: string): Promi
 
     const jsonText = response.text.trim();
     const parsedResponse = JSON.parse(jsonText);
-    return parsedResponse as DetectionResult[];
+    const filtered = (parsedResponse as DetectionResult[]).filter(
+      (result) => result.label !== 'No Endodontic Treatment'
+    );
+    return filtered;
 
   } catch (error) {
     console.error("Error calling Gemini API for image analysis:", error);
@@ -77,7 +80,7 @@ export const analyzeImage = async (base64Image: string, mimeType: string): Promi
   }
 };
 
-export const generateAnalysisDescription = async (results: DetectionResult[]): Promise<string> => {
+export const generateAnalysisDescription = async (results: DetectionResult[], yoloDetections?: any[]): Promise<string> => {
   const descriptionPrompt = `
 You are an expert AI dental radiologist providing a consultation. Based on the following detection results from a dental radiograph, generate a concise and informative report for a dental professional.
 
@@ -87,10 +90,12 @@ Then, for each identified issue, create a section with a markdown heading (e.g.,
 
 Maintain a professional and objective tone.
 
-The detected issues are:
+The detected root canal issues are:
 ${JSON.stringify(results, null, 2)}
+
+${yoloDetections ? `Additional object detections from YOLO model: ${JSON.stringify(yoloDetections, null, 2)}` : ''}
 `;
-  
+
   try {
     const response = await ai.models.generateContent({
       model: model,

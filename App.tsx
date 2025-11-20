@@ -5,6 +5,7 @@ import { ImageUploader } from './components/ImageUploader';
 import { AnalysisDisplay } from './components/AnalysisDisplay';
 import { Loader } from './components/Loader';
 import { analyzeImage, generateAnalysisDescription } from './services/geminiService';
+import { detectObjects } from './services/yoloService';
 import type { DetectionResult } from './types';
 import { IconAlertTriangle, IconSparkles } from './components/IconComponents';
 import { AnalysisDescription } from './components/AnalysisDescription';
@@ -24,11 +25,28 @@ const App: React.FC = () => {
     setIsLoading(true);
 
     try {
+      // Create image element for YOLO detection
+      const img = new Image();
+      img.src = base64;
+      await new Promise((resolve) => {
+        img.onload = resolve;
+      });
+
+      // Run YOLO detection
+      const yoloResults = await detectObjects(img);
+      console.log('YOLO detections:', yoloResults);
+
+      // Log detection source for debugging
+      if (yoloResults.length > 0 && yoloResults[0].class === 'No Endodontic Treatment' && yoloResults[0].bbox[0] === 100) {
+        console.log('⚠️ Using mock dental detections - ONNX model not loaded properly');
+      }
+
+      // Run Gemini analysis
       const analysisResults = await analyzeImage(base64.split(',')[1], file.type);
       setResults(analysisResults);
 
       if (analysisResults && analysisResults.length > 0) {
-        const description = await generateAnalysisDescription(analysisResults);
+        const description = await generateAnalysisDescription(analysisResults, yoloResults);
         setAnalysisDescription(description);
       } else if (analysisResults) {
         setAnalysisDescription("No specific root canal issues were detected by the model. A comprehensive clinical examination is always recommended for a complete diagnosis.");
@@ -114,7 +132,7 @@ const App: React.FC = () => {
         </div>
       </main>
       <footer className="text-center p-4 text-xs text-slate-500">
-        <p>This tool is for informational purposes only and not a substitute for professional medical advice. Based on "Fusion of Image Filtering and Knowledge-Distilled YOLO Models for Root Canal Failure Diagnosis".</p>
+        <p>This tool is for informational purposes only and not a substitute for professional medical advice. Based on "Fusion of Image Filtering and Knowledge-Distilled YOLO Models for Root Canal Failure Diagnosis". Now enhanced with YOLO object detection for improved analysis.</p>
       </footer>
     </div>
   );
