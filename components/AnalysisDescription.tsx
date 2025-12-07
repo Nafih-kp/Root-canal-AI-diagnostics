@@ -7,25 +7,51 @@ interface AnalysisDescriptionProps {
 
 export const AnalysisDescription: React.FC<AnalysisDescriptionProps> = ({ description }) => {
   return (
-    <div className="text-sm text-gray-300 space-y-3 leading-relaxed">
+    <div className="space-y-4 text-slate-300 leading-relaxed font-light">
       {description.split('\n').map((paragraph, index) => {
         const trimmed = paragraph.trim();
+
         if (trimmed.startsWith('### ')) {
-            return <h3 key={index} className="text-md font-semibold text-cyan-300 mt-4 mb-1">{trimmed.substring(4)}</h3>
+          return (
+            <div key={index} className="mt-6 mb-3 pb-2 border-b border-slate-700/50">
+              <h3 className="text-lg font-bold text-cyan-300 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                {trimmed.substring(4)}
+              </h3>
+            </div>
+          );
         }
+
         if (trimmed.startsWith('## ')) {
-            return <h2 key={index} className="text-lg font-bold text-cyan-400 mt-5 mb-2">{trimmed.substring(3)}</h2>
+          return (
+            <h2 key={index} className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400 mt-8 mb-4">
+              {trimmed.substring(3)}
+            </h2>
+          );
         }
+
         if (trimmed.startsWith('- ')) {
-             return <li key={index} className="ml-5 list-disc">{trimmed.substring(2)}</li>
+          return (
+            <div key={index} className="flex items-start gap-3 ml-2 mb-2 group">
+              <span className="mt-2 w-1.5 h-1.5 rounded-full bg-slate-600 group-hover:bg-cyan-400 transition-colors duration-300 shrink-0"></span>
+              <p className="text-slate-300 group-hover:text-slate-200 transition-colors">{trimmed.substring(2)}</p>
+            </div>
+          );
         }
+
         if (trimmed.startsWith('**') && trimmed.endsWith('**')) {
-            return <p key={index} className="font-bold my-2">{trimmed.substring(2, trimmed.length - 2)}</p>
+          return (
+            <div key={index} className="bg-slate-800/50 border-l-4 border-cyan-500 p-3 my-4 rounded-r-lg">
+              <p className="font-bold text-cyan-100">{trimmed.substring(2, trimmed.length - 2)}</p>
+            </div>
+          );
         }
+
         if (trimmed === '') {
-            return null; // Don't render empty paragraphs
+          return null;
         }
-        return <p key={index}>{trimmed}</p>
+
+        return <p key={index} className="mb-2">{trimmed}</p>
       })}
     </div>
   );

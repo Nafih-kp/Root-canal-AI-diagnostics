@@ -32,7 +32,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, isL
     e.preventDefault();
     setIsDragging(false);
   };
-  
+
   const onDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault(); // Necessary to allow drop
   };
@@ -44,11 +44,11 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, isL
       handleFile(e.dataTransfer.files[0]);
     }
   };
-  
+
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files && e.target.files[0]) {
-          handleFile(e.target.files[0]);
-      }
+    if (e.target.files && e.target.files[0]) {
+      handleFile(e.target.files[0]);
+    }
   };
 
   const onButtonClick = () => {
@@ -57,12 +57,18 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, isL
 
   return (
     <div
-      className={`relative w-full h-full p-4 border-2 border-dashed rounded-lg flex flex-col items-center justify-center text-center transition-all duration-300 ${isDragging ? 'border-cyan-400 bg-slate-700/50' : 'border-slate-700 bg-slate-800'}`}
+      className={`relative w-full h-full min-h-[400px] p-8 border-2 border-dashed rounded-xl flex flex-col items-center justify-center text-center transition-all duration-500 group overflow-hidden ${isDragging
+          ? 'border-cyan-400 bg-cyan-900/20 scale-[1.02] shadow-2xl shadow-cyan-500/20'
+          : 'border-slate-700 hover:border-slate-500 bg-slate-800/50 hover:bg-slate-800/80'
+        }`}
       onDragEnter={onDragEnter}
       onDragLeave={onDragLeave}
       onDragOver={onDragOver}
       onDrop={onDrop}
     >
+      {/* Background decoration */}
+      <div className={`absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 transition-opacity duration-500 ${isDragging ? 'opacity-100' : 'opacity-0'}`}></div>
+
       <input
         type="file"
         ref={fileInputRef}
@@ -71,19 +77,32 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, isL
         accept="image/*"
         disabled={isLoading}
       />
-      <IconUpload className={`w-16 h-16 mb-4 transition-colors ${isDragging ? 'text-cyan-400' : 'text-slate-500'}`} />
-      <p className="mb-2 text-lg font-semibold text-gray-300">
-        Drag & drop your X-ray image here
+
+      <div className={`relative z-10 p-6 rounded-full bg-slate-800/80 mb-6 transition-all duration-500 ${isDragging ? 'scale-110 shadow-lg shadow-cyan-500/30' : 'shadow-md'}`}>
+        <IconUpload className={`w-12 h-12 transition-colors duration-300 ${isDragging ? 'text-cyan-400' : 'text-slate-400 group-hover:text-cyan-300'}`} />
+      </div>
+
+      <h3 className="relative z-10 text-xl font-bold text-slate-200 mb-2 group-hover:text-white transition-colors">
+        {isDragging ? 'Drop Image Here' : 'Upload Radiograph'}
+      </h3>
+
+      <p className="relative z-10 text-slate-400 mb-8 max-w-xs mx-auto leading-relaxed">
+        Drag & drop your dental X-ray here, or click to browse files
       </p>
-      <p className="text-slate-400 mb-4">or</p>
+
       <button
         onClick={onButtonClick}
         disabled={isLoading}
-        className="px-6 py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="relative z-10 px-8 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-lg transition-all duration-300 shadow-lg shadow-cyan-900/50 hover:shadow-cyan-500/30 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 active:translate-y-0"
       >
-        Browse Files
+        Select Image
       </button>
-      <p className="text-xs text-slate-500 mt-4">Supports JPEG, PNG, WEBP</p>
+
+      <div className="relative z-10 mt-8 flex items-center gap-4 text-xs text-slate-500 font-medium uppercase tracking-wider">
+        <span className="px-2 py-1 bg-slate-800 rounded border border-slate-700">JPEG</span>
+        <span className="px-2 py-1 bg-slate-800 rounded border border-slate-700">PNG</span>
+        <span className="px-2 py-1 bg-slate-800 rounded border border-slate-700">WEBP</span>
+      </div>
     </div>
   );
 };

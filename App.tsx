@@ -68,71 +68,126 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-gray-200 flex flex-col font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100 flex flex-col font-sans selection:bg-cyan-500/30">
       <Header />
-      <main className="flex-grow container mx-auto p-4 md:p-8 flex flex-col">
-        <div className="flex-grow grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-          <div className="w-full h-full flex flex-col">
-            <h2 className="text-2xl font-bold mb-4 text-cyan-400">Upload Radiograph</h2>
-            <div className="flex-grow">
-              <ImageUploader onImageUpload={handleImageUpload} isLoading={isLoading} />
-            </div>
-          </div>
-          <div className="w-full h-full flex flex-col gap-4">
+      <main className="flex-grow container mx-auto p-4 md:p-8 flex flex-col max-w-7xl">
+        <div className="flex-grow grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+          {/* Left Column: Upload & Display */}
+          <div className="lg:col-span-7 w-full h-full flex flex-col gap-6">
             <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-cyan-400">AI Analysis</h2>
-                { (imageUrl || error) && (
-                    <button 
-                      onClick={handleReset} 
-                      className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50"
-                      disabled={isLoading}>
-                      Start Over
-                    </button>
-                )}
-            </div>
-            <div className="bg-slate-800 rounded-lg p-4 flex-grow flex items-center justify-center min-h-[300px] lg:min-h-[400px] border-2 border-dashed border-slate-700">
-              {isLoading && <Loader />}
-              {error && !isLoading && (
-                <div className="text-center text-red-400">
-                  <IconAlertTriangle className="mx-auto h-12 w-12 mb-4" />
-                  <p className="font-semibold">Analysis Failed</p>
-                  <p className="text-sm max-w-sm mx-auto">{error}</p>
-                </div>
-              )}
-              {!isLoading && !error && imageUrl && <AnalysisDisplay imageUrl={imageUrl} results={results} />}
-              {!isLoading && !error && !imageUrl && (
-                <div className="text-center text-slate-500">
-                  <p className="text-lg font-medium">Results will be displayed here.</p>
-                  <p className="text-sm">Upload a dental X-ray to begin the analysis.</p>
-                </div>
+              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-teal-300">
+                Radiograph Analysis
+              </h2>
+              {(imageUrl || error) && (
+                <button
+                  onClick={handleReset}
+                  className="px-4 py-2 bg-slate-700/50 hover:bg-slate-600/80 border border-slate-600 hover:border-slate-500 rounded-lg text-sm font-semibold transition-all duration-200 disabled:opacity-50 shadow-sm hover:shadow-md flex items-center gap-2"
+                  disabled={isLoading}>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                  </svg>
+                  New Analysis
+                </button>
               )}
             </div>
 
-            { (imageUrl || (error && results)) && (
-                <div className="bg-slate-800 rounded-lg p-4 border border-slate-700/50">
-                    <h3 className="text-xl font-bold text-cyan-400 mb-3 flex items-center gap-2">
-                        <IconSparkles className="w-6 h-6" />
-                        <span>Report & Recommendations</span>
-                    </h3>
-                    {isLoading && (
-                        <div className="flex items-center gap-3 text-slate-400 animate-pulse">
-                            <div className="w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
-                            <span>Generating report...</span>
-                        </div>
-                    )}
-                    {!isLoading && analysisDescription && (
-                        <AnalysisDescription description={analysisDescription} />
-                    )}
-                    {!isLoading && error && !analysisDescription && (
-                        <p className="text-red-400 text-sm">Could not generate a report due to an earlier error.</p>
-                    )}
+            <div className="bg-slate-800/40 backdrop-blur-sm rounded-2xl p-1 flex-grow flex flex-col min-h-[500px] border border-slate-700/50 shadow-xl overflow-hidden relative group">
+              {/* Decorative corner accents */}
+              <div className="absolute top-0 left-0 w-20 h-20 bg-cyan-500/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+              <div className="absolute bottom-0 right-0 w-20 h-20 bg-teal-500/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 pointer-events-none"></div>
+
+              {!imageUrl ? (
+                <div className="flex-grow p-6 flex flex-col">
+                  <ImageUploader onImageUpload={handleImageUpload} isLoading={isLoading} />
                 </div>
-            )}
+              ) : (
+                <div className="relative flex-grow flex items-center justify-center bg-black/20 rounded-xl overflow-hidden">
+                  {isLoading && (
+                    <div className="absolute inset-0 z-20 bg-slate-900/60 backdrop-blur-[2px] flex flex-col items-center justify-center">
+                      <Loader />
+                      <p className="mt-4 text-cyan-300 font-medium animate-pulse">Analyzing radiograph structure...</p>
+                    </div>
+                  )}
+
+                  {error && !isLoading && (
+                    <div className="text-center text-red-400 p-8 max-w-md mx-auto bg-slate-800/80 rounded-xl border border-red-500/30 shadow-lg backdrop-blur-md">
+                      <IconAlertTriangle className="mx-auto h-12 w-12 mb-4 text-red-500" />
+                      <p className="font-bold text-lg mb-2">Analysis Failed</p>
+                      <p className="text-sm text-slate-300">{error}</p>
+                    </div>
+                  )}
+
+                  {!error && <AnalysisDisplay imageUrl={imageUrl} results={results} />}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right Column: Results & Report */}
+          <div className="lg:col-span-5 w-full h-full flex flex-col gap-6">
+            <div className="flex items-center gap-2">
+              <IconSparkles className="w-6 h-6 text-cyan-400" />
+              <h2 className="text-2xl font-bold text-slate-100">Diagnostic Report</h2>
+            </div>
+
+            <div className={`flex-grow bg-slate-800/60 backdrop-blur-md rounded-2xl border border-slate-700/50 shadow-xl overflow-hidden transition-all duration-500 ${!imageUrl && !error ? 'opacity-50 grayscale' : 'opacity-100'}`}>
+
+              {!imageUrl && !error ? (
+                <div className="h-full flex flex-col items-center justify-center p-8 text-center text-slate-500 space-y-4">
+                  <div className="w-16 h-16 rounded-full bg-slate-700/50 flex items-center justify-center mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 011.414.586l4 4a1 1 0 01.586 1.414V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-lg font-medium text-slate-400">Waiting for Analysis</p>
+                    <p className="text-sm mt-1 max-w-[200px] mx-auto">Upload a dental X-ray to generate a comprehensive AI diagnostic report.</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="h-full flex flex-col">
+                  {/* Report Header */}
+                  <div className="p-4 border-b border-slate-700/50 bg-slate-800/80 flex justify-between items-center">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400">AI Generated Findings</span>
+                    {isLoading && <span className="text-xs text-cyan-400 animate-pulse">Processing...</span>}
+                    {!isLoading && analysisDescription && <span className="text-xs text-emerald-400 flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400"></span> Ready
+                    </span>}
+                  </div>
+
+                  {/* Report Content */}
+                  <div className="p-6 overflow-y-auto max-h-[600px] custom-scrollbar">
+                    {isLoading ? (
+                      <div className="space-y-4 animate-pulse">
+                        <div className="h-4 bg-slate-700/50 rounded w-3/4"></div>
+                        <div className="h-4 bg-slate-700/50 rounded w-full"></div>
+                        <div className="h-4 bg-slate-700/50 rounded w-5/6"></div>
+                        <div className="h-20 bg-slate-700/30 rounded w-full mt-6"></div>
+                      </div>
+                    ) : (
+                      <>
+                        {analysisDescription && <AnalysisDescription description={analysisDescription} />}
+                        {error && !analysisDescription && (
+                          <p className="text-slate-400 italic text-center mt-10">Report generation unavailable.</p>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </main>
-      <footer className="text-center p-4 text-xs text-slate-500">
-        <p>This tool is for informational purposes only and not a substitute for professional medical advice. Based on "Fusion of Image Filtering and Knowledge-Distilled YOLO Models for Root Canal Failure Diagnosis". Now enhanced with YOLO object detection for improved analysis.</p>
+
+      <footer className="text-center py-6 text-xs text-slate-500 border-t border-slate-800/50 mt-8 bg-slate-900/50 backdrop-blur-sm">
+        <div className="container mx-auto px-4">
+          <p className="max-w-2xl mx-auto">
+            <span className="font-semibold text-slate-400">Disclaimer:</span> This tool is for informational and educational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of a qualified health provider with any questions you may have regarding a medical condition.
+          </p>
+          <p className="mt-2 opacity-60">Based on "Fusion of Image Filtering and Knowledge-Distilled YOLO Models for Root Canal Failure Diagnosis".</p>
+        </div>
       </footer>
     </div>
   );

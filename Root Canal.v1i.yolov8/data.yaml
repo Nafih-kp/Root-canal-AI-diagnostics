@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 4
+names: ['Class 0- No endodontic treatment', 'Class 1- complete endodontic treatment', 'Class 2- incomplete endodontic treatment', 'cavity']
+
+roboflow:
+  workspace: md-farhan-hasin-saad
+  project: root-canal
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/md-farhan-hasin-saad/root-canal/dataset/1

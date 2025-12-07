@@ -18,3 +18,11 @@ View your app in AI Studio: https://ai.studio/apps/drive/1n8QXhbFSpQTjHTEeTUvkUO
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
 3. Run the app:
    `npm run dev`
+
+
+apply_mean_filter: Uses cv2.blur
+apply_median_filter: Uses cv2.medianBlur
+apply_gaussian_filter: Uses cv2.GaussianBlur
+apply_non_local_means: Uses cv2.fastNlMeansDenoising
+apply_bayesian_wavelet: Uses skimage.restoration.denoise_wavelet (BayesShrink)
+apply_contourlet_proxy: Uses cv2.getGaborKernel and convolution (Gabor Filter)

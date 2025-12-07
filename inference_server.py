@@ -14,10 +14,17 @@ app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
 # Load the trained model
-model_path = r'runs\detect\train\weights\best.pt'
+model_path = 'dental_yolo_roboflow_filtered.pt'
 model = None
 contourlet_filter = None
-use_filter = True
+use_filter = True  # Enabled for filtered model (train-inference consistency)
+
+class_names = [
+    'No Endodontic Treatment',
+    'Complete Endodontic Treatment',
+    'Incomplete Endodontic Treatment',
+    'Total Endodontic Failure'
+]
 
 def load_model():
     global model
@@ -113,8 +120,6 @@ def detect():
                 height = (y2 - y1) / img_height
 
                 # Map class ID to name
-                class_names = ['No Endodontic Treatment', 'Incomplete Endodontic Treatment',
-                             'Complete Endodontic Treatment', 'Total Endodontic Failure']
                 class_name = class_names[class_id] if class_id < len(class_names) else f"class_{class_id}"
 
                 detections.append({
@@ -143,7 +148,11 @@ if __name__ == '__main__':
     if use_filter and load_filter():
         print("✓ Contourlet filter enabled")
     else:
-        print("⚠️  Running without Contourlet filter")
+        print("⚠️  Running without preprocessing filter")
+    
+    print(f"\nClass mapping:")
+    for i, name in enumerate(class_names):
+        print(f"  {i}: {name}")
     
     print(f"\nServer configuration:")
     print(f"  Host: 0.0.0.0")
