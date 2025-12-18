@@ -14,6 +14,7 @@ const App: React.FC = () => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [results, setResults] = useState<DetectionResult[] | null>(null);
   const [analysisDescription, setAnalysisDescription] = useState<string | null>(null);
+  const [heatmap, setHeatmap] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,12 +33,21 @@ const App: React.FC = () => {
         img.onload = resolve;
       });
 
-      // Run YOLO detection
-      const yoloResults = await detectObjects(img);
-      console.log('YOLO detections:', yoloResults);
+      // Run YOLO detection with Grad-CAM enabled
+      console.log('Running YOLO detection with Grad-CAM...');
+      const yoloResponse = await detectObjects(file, false, true);
+      const yoloDetections = yoloResponse.detections;
+      console.log('YOLO detections:', yoloDetections);
+
+      if (yoloResponse.heatmap) {
+        console.log("✓ Heatmap received");
+        setHeatmap(yoloResponse.heatmap);
+      } else {
+        console.log("⚠️ No heatmap received");
+      }
 
       // Log detection source for debugging
-      if (yoloResults.length > 0 && yoloResults[0].class === 'No Endodontic Treatment' && yoloResults[0].bbox[0] === 100) {
+      if (yoloDetections.length > 0 && yoloDetections[0].class === 'No Endodontic Treatment' && yoloDetections[0].bbox[0] === 100) {
         console.log('⚠️ Using mock dental detections - ONNX model not loaded properly');
       }
 
@@ -46,7 +56,7 @@ const App: React.FC = () => {
       setResults(analysisResults);
 
       if (analysisResults && analysisResults.length > 0) {
-        const description = await generateAnalysisDescription(analysisResults, yoloResults);
+        const description = await generateAnalysisDescription(analysisResults, yoloDetections);
         setAnalysisDescription(description);
       } else if (analysisResults) {
         setAnalysisDescription("No specific root canal issues were detected by the model. A comprehensive clinical examination is always recommended for a complete diagnosis.");
@@ -118,7 +128,7 @@ const App: React.FC = () => {
                     </div>
                   )}
 
-                  {!error && <AnalysisDisplay imageUrl={imageUrl} results={results} />}
+                  {!error && <AnalysisDisplay imageUrl={imageUrl} results={results} heatmap={heatmap} />}
                 </div>
               )}
             </div>

@@ -28,107 +28,58 @@ import * as cocoSsd from '@tensorflow-models/coco-ssd';
 
 let model: cocoSsd.ObjectDetection | null = null;
 
-export interface YoloDetection {
-  bbox: [number, number, number, number]; // [x, y, width, height]
-  class: string;
-  score: number;
-}
+import type { YoloResponse, DetectionResult } from '../types';
 
 const classNames = ['No Endodontic Treatment', 'Incomplete Endodontic Treatment', 'Complete Endodontic Treatment', 'Total Endodontic Failure'];
 
-export const detectObjects = async (imageElement: HTMLImageElement): Promise<YoloDetection[]> => {
-  try {
-    // Convert image to base64 for server with proper dimensions
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    
-    if (!ctx) {
-      throw new Error('Failed to get canvas context');
-    }
-    
-    const width = imageElement.naturalWidth || imageElement.width;
-    const height = imageElement.naturalHeight || imageElement.height;
-    
-    if (width <= 0 || height <= 0) {
-      throw new Error(`Invalid image dimensions: ${width}x${height}`);
-    }
-    
-    canvas.width = width;
-    canvas.height = height;
-    
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, width, height);
-    ctx.drawImage(imageElement, 0, 0);
 
-    const base64Image = canvas.toDataURL('image/jpeg', 0.95);
-    
-    if (!base64Image || base64Image.length < 100) {
-      throw new Error('Failed to generate valid base64 image');
-    }
+export const detectObjects = async (file: File, enableFilter: boolean = false, enableGradCam: boolean = false): Promise<YoloResponse> => {
+  try {
+    // Convert File to Base64
+    const toBase64 = (file: File): Promise<string> => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+
+    const base64Image = await toBase64(file);
 
     console.log('Calling server-side YOLO inference...');
-    console.log(`Image size: ${base64Image.length} bytes`);
-    
-    const response = await fetch('http://localhost:5000/detect', {
+
+    // Configurable endpoint
+    const endpoint = 'http://localhost:5000/detect';
+
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ image: base64Image }),
+      body: JSON.stringify({
+        image: base64Image,
+        enable_filter: enableFilter,
+        enable_gradcam: enableGradCam
+      }),
     });
 
     if (response.ok) {
       const result = await response.json();
       console.log('Server detections:', result.detections);
-      const filtered = (result.detections || []).filter(
-        (det: YoloDetection) => det.class !== 'No Endodontic Treatment'
-      );
-      return filtered;
+
+      return {
+        detections: result.detections || [],
+        image_size: result.image_size,
+        heatmap: result.heatmap
+      };
     } else {
       const errorText = await response.text();
       console.error(`Server inference failed (${response.status}):`, errorText);
-      console.warn('Server inference failed:', response.status, response.statusText);
+      throw new Error(`Server error: ${response.statusText}`);
     }
   } catch (error) {
     console.error('Server inference error:', error);
-    console.warn('Server inference error:', error);
+    // Fallback or rethrow
+    throw error;
   }
-
-  // Fallback to COCO-SSD
-  if (!model) {
-    try {
-      await tf.ready();
-      model = await cocoSsd.load();
-      console.log('Loaded COCO-SSD fallback');
-    } catch (error) {
-      console.warn('COCO-SSD fallback failed:', error);
-    }
-  }
-
-  if (model) {
-    try {
-      const predictions = await model.detect(imageElement);
-      console.log('COCO-SSD predictions:', predictions);
-      return predictions
-        .map(pred => ({
-          bbox: [pred.bbox[0], pred.bbox[1], pred.bbox[2], pred.bbox[3]],
-          class: pred.class,
-          score: pred.score
-        }))
-        .filter(det => det.class !== 'No Endodontic Treatment');
-    } catch (error) {
-      console.warn('COCO-SSD detection failed:', error);
-    }
-  }
-
-  // Last resort: return mock dental detections for testing
-  console.log('Using mock dental detections for testing');
-  return [
-    {
-      bbox: [0.4, 0.3, 0.25, 0.15],
-      class: 'Complete Endodontic Treatment',
-      score: 0.75
-    }
-  ];
 };
 

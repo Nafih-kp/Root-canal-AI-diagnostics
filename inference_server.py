@@ -1,3 +1,4 @@
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import cv2
@@ -9,6 +10,7 @@ from PIL import Image
 import ultralytics
 from ultralytics import YOLO
 from contourlet_filter import ContourletTransform
+from grad_cam import YOLOGradCAM, overlay_heatmap
 import json
 from pathlib import Path
 
@@ -212,13 +214,72 @@ def detect():
         # Run inference
         try:
             print(f"Running inference on image shape: {img_array.shape}")
-            results = model(img_array, conf=0.25)
+            results = model.predict(img_array, conf=0.25)
             print(f"✓ Inference completed, processing results")
         except Exception as e:
             print(f"✗ Inference error: {e}")
             import traceback
             traceback.print_exc()
             return jsonify({"error": f"YOLO inference failed: {str(e)}"}), 500
+        
+        # --- GRAD-CAM GENERATION ---
+        heatmap_base64 = None
+        try:
+            # Check if user requested explainability
+            # data was loaded earlier from request.get_json()
+            raw_enable_gradcam = data.get('enable_gradcam')
+            use_gradcam = raw_enable_gradcam is True or str(raw_enable_gradcam).lower() == 'true'
+            
+            print(f"DEBUG: raw_enable_gradcam={raw_enable_gradcam}, use_gradcam={use_gradcam}")
+
+            if use_gradcam:
+                 # Initialize Grad-CAM
+                # Note: creating a new hook per request is inefficient for prod, 
+                # but fine for this demo. Ideally, initialize once.
+                
+                print("DEBUG: Initializing YOLOGradCAM...")
+                # We need to preprocess the image manually for Grad-CAM input
+                # YOLOv8 preprocessing: resize to 640, normalize 0-1, CHW format
+                
+                # Use Ultralytics internal transform if possible, or manual
+                target_layers = [model.model.model[-2]] # Default fallback
+                try:
+                    grad_cam = YOLOGradCAM(model, target_layers[0])
+                    print("DEBUG: YOLOGradCAM initialized.")
+                except Exception as e:
+                    print(f"DEBUG: Failed to init YOLOGradCAM: {e}")
+                    grad_cam = None
+
+                if grad_cam:
+                    # Resize for model input (640x640 is standard for YOLOv8)
+                    img_resized = cv2.resize(img_array, (640, 640))
+                    # Normalization handled by model usually, but let's check input
+                    input_tensor = torch.from_numpy(img_resized).permute(2, 0, 1).unsqueeze(0).float() / 255.0
+                    input_tensor = input_tensor.to(model.device if hasattr(model, 'device') else 'cpu')
+
+                    print("DEBUG: Generating heatmap...")
+                    # Generate heatmap
+                    grayscale_cam = grad_cam(input_tensor, None)
+                    print(f"DEBUG: Heatmap generated. Shape: {grayscale_cam.shape if grayscale_cam is not None else 'None'}")
+
+                    # Resize heatmap back to original image size
+                    if grayscale_cam is not None:
+                         # Start Overlay
+                        heatmap_overlay = overlay_heatmap(img_array, grayscale_cam[0, :])
+                        
+                        # Convert to base64
+                        _, buffer = cv2.imencode('.jpg', heatmap_overlay)
+                        heatmap_base64 = base64.b64encode(buffer).decode('utf-8')
+                        print("DEBUG: Heatmap overlay created and encoded.")
+                    else:
+                        print("DEBUG: grayscale_cam is None.")
+            else:
+                print("DEBUG: describe_gradcam skipped.")
+
+        except Exception as e:
+            print(f"⚠ Grad-CAM generation failed: {e}")
+            import traceback
+            traceback.print_exc()
 
         # Process results
         detections = []
@@ -228,30 +289,28 @@ def detect():
                 for box in boxes:
                     # Get bounding box coordinates
                     x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
-                    confidence = float(box.conf[0].cpu().numpy())
-                    class_id = int(box.cls[0].cpu().numpy())
-
-                    # Convert to normalized coordinates
-                    img_height, img_width = img_array.shape[:2]
-                    x = float(x1 / img_width)
-                    y = float(y1 / img_height)
-                    width = float((x2 - x1) / img_width)
-                    height = float((y2 - y1) / img_height)
+                    conf = float(box.conf[0].cpu().numpy())
+                    cls_id = int(box.cls[0].cpu().numpy())
 
                     # Map class ID to name
-                    class_name = class_names[class_id] if class_id < len(class_names) else f"class_{class_id}"
+                    class_name = class_names[cls_id] if cls_id < len(class_names) else f"class_{cls_id}"
 
                     detections.append({
-                        'bbox': [x, y, width, height],
-                        'class': class_name,
-                        'score': confidence
+                        "bbox": [float(x1), float(y1), float(x2), float(y2)],
+                        "confidence": conf,
+                        "class": class_name,
+                        "class_id": cls_id
                     })
         except Exception as e:
             print(f"✗ Result processing error: {e}")
             return jsonify({"error": f"Failed to process results: {str(e)}"}), 500
 
         print(f"✓ Detection completed: {len(detections)} objects detected")
-        return jsonify({"detections": detections})
+        return jsonify({
+            "detections": detections,
+            "image_size": {"width": img_array.shape[1], "height": img_array.shape[0]},
+            "heatmap": heatmap_base64
+        })
 
     except Exception as e:
         print(f"✗ Unexpected error during detection: {e}")
