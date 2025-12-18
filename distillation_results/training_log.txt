@@ -1,0 +1,109 @@
+
+============================================================
+PHASE 1: Training Teacher Model (YOLOv8m)
+============================================================
+
+============================================================
+PHASE 1: Training Teacher Model (YOLOv8m)
+============================================================
+
+============================================================
+PHASE 1: Training Teacher Model (YOLOv8m)
+============================================================
+
+============================================================
+PHASE 2: Training Student Model with Knowledge Distillation
+============================================================
+
+Teacher model parameters: 25,858,636
+Student model parameters: 3,157,200
+
+Initializing training with 100 epochs...
+Temperature: 4.0, Alpha (task loss weight): 0.7
+Teacher will provide knowledge supervision to Student
+
+Warning: Custom distillation loop error: 'DetectionModel' object has no attribute 'getattr'
+Epoch 1: New best distillation loss 0.0000
+
+============================================================
+PHASE 2: Training Student Model with Knowledge Distillation
+============================================================
+
+Teacher model parameters: 25,858,636
+Student model parameters: 3,157,200
+
+Initializing training with 100 epochs...
+Temperature: 4.0, Alpha (task loss weight): 0.7
+Teacher will provide knowledge supervision to Student
+
+Warning: Could not build dataloader: build_dataloader() got an unexpected keyword argument 'imgsz'
+Epoch 1: New best distillation loss 0.0000
+[WARNING] Training step error at epoch 2: 'model'
+[WARNING] Training step error at epoch 3: 'model'
+[WARNING] Training step error at epoch 4: 'model'
+[WARNING] Training step error at epoch 5: 'model'
+[WARNING] Training step error at epoch 6: 'model'
+[WARNING] Training step error at epoch 7: 'model'
+[WARNING] Training step error at epoch 8: 'model'
+[WARNING] Training step error at epoch 9: 'model'
+[WARNING] Training step error at epoch 10: 'model'
+[WARNING] Training step error at epoch 11: 'model'
+[WARNING] Training step error at epoch 12: 'model'
+[WARNING] Training step error at epoch 13: 'model'
+[WARNING] Training step error at epoch 14: 'model'
+[WARNING] Training step error at epoch 15: 'model'
+[WARNING] Training step error at epoch 16: 'model'
+[WARNING] Training step error at epoch 17: 'model'
+[WARNING] Training step error at epoch 18: 'model'
+[WARNING] Training step error at epoch 19: 'model'
+[WARNING] Training step error at epoch 20: 'model'
+[WARNING] Training step error at epoch 21: 'model'
+Early stopping at epoch 21
+
+[OK] Student model training with distillation completed
+  Path: distillation_results\student_with_distillation\weights\best.pt
+
+============================================================
+PHASE 1: Training Teacher Model (YOLOv8m)
+============================================================
+
+[OK] Teacher model training completed
+  Path: distillation_results\teacher_model\weights\best.pt
+
+============================================================
+PHASE 2: Training Student Model with Knowledge Distillation
+============================================================
+
+Teacher model parameters: 25,858,636
+Student model parameters: 3,157,200
+
+Initializing training with 100 epochs...
+Temperature: 4.0, Alpha (task loss weight): 0.7
+Teacher will provide knowledge supervision to Student
+
+Warning: Could not build dataloader: build_dataloader() got an unexpected keyword argument 'imgsz'
+Epoch 1: New best distillation loss 0.0000
+[WARNING] Training step error at epoch 2: 'model'
+[WARNING] Training step error at epoch 3: 'model'
+[WARNING] Training step error at epoch 4: 'model'
+[WARNING] Training step error at epoch 5: 'model'
+[WARNING] Training step error at epoch 6: 'model'
+[WARNING] Training step error at epoch 7: 'model'
+[WARNING] Training step error at epoch 8: 'model'
+[WARNING] Training step error at epoch 9: 'model'
+[WARNING] Training step error at epoch 10: 'model'
+[WARNING] Training step error at epoch 11: 'model'
+[WARNING] Training step error at epoch 12: 'model'
+[WARNING] Training step error at epoch 13: 'model'
+[WARNING] Training step error at epoch 14: 'model'
+[WARNING] Training step error at epoch 15: 'model'
+[WARNING] Training step error at epoch 16: 'model'
+[WARNING] Training step error at epoch 17: 'model'
+[WARNING] Training step error at epoch 18: 'model'
+[WARNING] Training step error at epoch 19: 'model'
+[WARNING] Training step error at epoch 20: 'model'
+[WARNING] Training step error at epoch 21: 'model'
+Early stopping at epoch 21
+
+[OK] Student model training with distillation completed
+  Path: distillation_results\student_with_distillation\weights\best.pt

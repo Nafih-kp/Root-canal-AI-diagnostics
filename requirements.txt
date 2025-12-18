@@ -5,3 +5,9 @@ opencv-python
 numpy
 pillow
 matplotlib
+scikit-learn
+seaborn
+tqdm
+flask
+flask-cors
+pandas

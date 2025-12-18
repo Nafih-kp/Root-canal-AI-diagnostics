@@ -1,0 +1,71 @@
+{
+  "Student_Baseline": {
+    "overall": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "mAP50": 0.0,
+      "mAP50-95": 0.0
+    },
+    "per_class": {
+      "No Endodontic Treatment": {
+        "AP50": 0.0
+      },
+      "Incomplete Endodontic Treatment": {
+        "AP50": 0.0
+      },
+      "Complete Endodontic Treatment": {
+        "AP50": 0.0
+      },
+      "Total Endodontic Failure": {
+        "AP50": 0.0
+      }
+    },
+    "medical": {}
+  },
+  "Student_Distilled": {
+    "overall": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "mAP50": 0.0,
+      "mAP50-95": 0.0
+    },
+    "per_class": {
+      "No Endodontic Treatment": {
+        "AP50": 0.0
+      },
+      "Incomplete Endodontic Treatment": {
+        "AP50": 0.0
+      },
+      "Complete Endodontic Treatment": {
+        "AP50": 0.0
+      },
+      "Total Endodontic Failure": {
+        "AP50": 0.0
+      }
+    },
+    "medical": {}
+  },
+  "Teacher_Model": {
+    "overall": {
+      "precision": 0.3846735456324497,
+      "recall": 0.28163621032495156,
+      "mAP50": 0.3118008431644499,
+      "mAP50-95": 0.1455665580990146
+    },
+    "per_class": {
+      "No Endodontic Treatment": {
+        "AP50": 0.2912022350485731
+      },
+      "Incomplete Endodontic Treatment": {
+        "AP50": 0.12285839265095173
+      },
+      "Complete Endodontic Treatment": {
+        "AP50": 0.11676622959093548
+      },
+      "Total Endodontic Failure": {
+        "AP50": 0.044474545454545454
+      }
+    },
+    "medical": {}
+  }
+}

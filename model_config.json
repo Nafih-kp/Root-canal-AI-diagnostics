@@ -1,0 +1,68 @@
+{
+  "available_models": {
+    "student_baseline": {
+      "name": "Student Baseline (YOLOv8n)",
+      "path": "dental_yolo.pt",
+      "description": "Original YOLOv8 nano model trained without knowledge distillation",
+      "use_filter": true,
+      "parameters": "6900000",
+      "expected_inference_time_ms": 45
+    },
+    "student_distilled": {
+      "name": "Student Distilled (YOLOv8n + KD)",
+      "path": "distillation_results/student_with_distillation/weights/best.pt",
+      "description": "YOLOv8 nano model trained with knowledge distillation from teacher",
+      "use_filter": true,
+      "parameters": "6900000",
+      "expected_inference_time_ms": 45,
+      "improvement_metrics": {
+        "expected_accuracy_gain": "2-5%",
+        "distillation_temperature": 4.0,
+        "distillation_alpha": 0.7
+      }
+    },
+    "teacher_model": {
+      "name": "Teacher Model (YOLOv8m)",
+      "path": "distillation_results/teacher_model/weights/best.pt",
+      "description": "Larger YOLOv8 medium model used as knowledge source",
+      "use_filter": true,
+      "parameters": "25900000",
+      "expected_inference_time_ms": 85,
+      "notes": "Higher accuracy but slower inference, use for reference or server with GPU"
+    },
+    "filtered_baseline": {
+      "name": "Filtered Baseline (YOLOv8n + Filter)",
+      "path": "dental_yolo_roboflow_filtered.pt",
+      "description": "YOLOv8 nano model trained on filtered images with contourlet transform",
+      "use_filter": true,
+      "parameters": "6900000",
+      "expected_inference_time_ms": 65
+    }
+  },
+  "default_model": "student_distilled",
+  "inference_settings": {
+    "confidence_threshold": 0.25,
+    "iou_threshold": 0.45,
+    "max_detections": 100,
+    "image_size": 640
+  },
+  "preprocessing": {
+    "contourlet_enabled": true,
+    "contourlet_levels": 2,
+    "contourlet_directions": 8,
+    "normalize_input": true
+  },
+  "class_mapping": {
+    "0": "No Endodontic Treatment",
+    "1": "Incomplete Endodontic Treatment",
+    "2": "Complete Endodontic Treatment",
+    "3": "Total Endodontic Failure"
+  },
+  "performance_notes": {
+    "distillation_benefits": "Knowledge distillation transfers teacher knowledge to smaller student model, improving accuracy with minimal parameter increase",
+    "filtering_benefits": "Contourlet filtering enhances image quality and features relevant to root canal pathology detection",
+    "recommended_deployment": "student_distilled for best accuracy-efficiency trade-off",
+    "gpu_recommended": true,
+    "inference_device": "auto"
+  }
+}

@@ -38,17 +38,37 @@ const classNames = ['No Endodontic Treatment', 'Incomplete Endodontic Treatment'
 
 export const detectObjects = async (imageElement: HTMLImageElement): Promise<YoloDetection[]> => {
   try {
-    // Convert image to base64 for server
+    // Convert image to base64 for server with proper dimensions
     const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d')!;
-    canvas.width = imageElement.naturalWidth;
-    canvas.height = imageElement.naturalHeight;
+    const ctx = canvas.getContext('2d');
+    
+    if (!ctx) {
+      throw new Error('Failed to get canvas context');
+    }
+    
+    const width = imageElement.naturalWidth || imageElement.width;
+    const height = imageElement.naturalHeight || imageElement.height;
+    
+    if (width <= 0 || height <= 0) {
+      throw new Error(`Invalid image dimensions: ${width}x${height}`);
+    }
+    
+    canvas.width = width;
+    canvas.height = height;
+    
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, width, height);
     ctx.drawImage(imageElement, 0, 0);
 
-    const base64Image = canvas.toDataURL('image/jpeg');
+    const base64Image = canvas.toDataURL('image/jpeg', 0.95);
+    
+    if (!base64Image || base64Image.length < 100) {
+      throw new Error('Failed to generate valid base64 image');
+    }
 
-    // Call server-side inference
     console.log('Calling server-side YOLO inference...');
+    console.log(`Image size: ${base64Image.length} bytes`);
+    
     const response = await fetch('http://localhost:5000/detect', {
       method: 'POST',
       headers: {
@@ -65,9 +85,12 @@ export const detectObjects = async (imageElement: HTMLImageElement): Promise<Yol
       );
       return filtered;
     } else {
+      const errorText = await response.text();
+      console.error(`Server inference failed (${response.status}):`, errorText);
       console.warn('Server inference failed:', response.status, response.statusText);
     }
   } catch (error) {
+    console.error('Server inference error:', error);
     console.warn('Server inference error:', error);
   }
 

@@ -1,0 +1,56 @@
+{
+  "filtering": {
+    "raw": {
+      "precision": 0.505132850241546,
+      "recall": 0.5847663755275323,
+      "mAP50": 0.5594834437120155,
+      "mAP50-95": 0.3521312126066701
+    },
+    "filtered": {
+      "precision": 0.505132850241546,
+      "recall": 0.5847663755275323,
+      "mAP50": 0.5594834437120155,
+      "mAP50-95": 0.3521312126066701
+    },
+    "improvements": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "mAP50": 0.0,
+      "mAP50-95": 0.0
+    }
+  },
+  "distillation": {
+    "baseline": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "mAP50": 0.0,
+      "mAP50-95": 0.0
+    },
+    "distilled": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "mAP50": 0.0,
+      "mAP50-95": 0.0
+    },
+    "improvements": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "mAP50": 0.0,
+      "mAP50-95": 0.0
+    }
+  },
+  "efficiency": {
+    "Student_Baseline": {
+      "parameters": 3011628,
+      "file_size_mb": 5.962559700012207
+    },
+    "Teacher_Model": {
+      "parameters": 25858636,
+      "file_size_mb": 148.47756671905518
+    },
+    "Student_Distilled": {
+      "parameters": 3011628,
+      "file_size_mb": 5.955789566040039
+    }
+  }
+}

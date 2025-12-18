@@ -1,0 +1,32 @@
+============================================================
+COMPREHENSIVE COMPARATIVE ANALYSIS
+============================================================
+
+Analyzing Knowledge Distillation Implementation
+Comparing: Filtering Impact, Distillation Impact, Model Efficiency
+
+
+============================================================
+IMPACT ANALYSIS: Image Filtering (Raw vs Filtered)
+============================================================
+[WARNING] Filtering analysis failed: [Errno 2] No such file or directory: 'dental_yolo_roboflow_filtered.pt'
+
+============================================================
+IMPACT ANALYSIS: Knowledge Distillation
+============================================================
+[WARNING] Distillation analysis failed: [Errno 2] No such file or directory: 'dental_yolo.pt'
+
+============================================================
+MODEL EFFICIENCY COMPARISON
+============================================================
+[FAILED] Error analyzing Student_Baseline: [Errno 2] No such file or directory: 'dental_yolo.pt'
+[FAILED] Error analyzing Teacher_Model: [Errno 2] No such file or directory: 'distillation_results/teacher_model/weights/best.pt'
+[FAILED] Error analyzing Student_Distilled: [Errno 2] No such file or directory: 'distillation_results/student_with_distillation/weights/best.pt'
+
+Generating comparison visualizations...
+[OK] Comparison plots saved
+
+============================================================
+[OK] ANALYSIS COMPLETED
+Results saved to: comparative_results
+============================================================

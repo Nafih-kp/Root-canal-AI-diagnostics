@@ -102,9 +102,17 @@ class ContourletTransform:
         """Apply Contourlet-like transform to image"""
         try:
             if len(image.shape) == 3:
-                gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                if image.shape[2] == 4:
+                    gray = cv2.cvtColor(image, cv2.COLOR_BGRA2GRAY)
+                elif image.shape[2] == 3:
+                    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                else:
+                    gray = image[:,:,0]
             else:
                 gray = image.copy()
+            
+            if gray is None or gray.size == 0:
+                return image
             
             gray = gray.astype(np.float32) / 255.0
             
