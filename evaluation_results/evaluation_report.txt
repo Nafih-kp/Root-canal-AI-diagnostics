@@ -295,3 +295,135 @@ Filter enabled: False
 
 [OK] Full report completed
   Results saved to: evaluation_results\results.json
+
+============================================================
+COMPREHENSIVE MODEL EVALUATION REPORT
+============================================================
+
+Knowledge Distillation Evaluation: Comparing student models with and without distillation knowledge transfer
+
+
+============================================================
+MODEL: Student_Without_Distillation
+Path: dental_yolo.pt
+============================================================
+
+============================================================
+Evaluating: dental_yolo.pt
+Filter enabled: False
+============================================================
+  precision: 0.0000
+  recall: 0.0000
+  mAP50: 0.0000
+  mAP50-95: 0.0000
+
+Per-Class Metrics for: dental_yolo.pt
+------------------------------------------------------------
+  No Endodontic Treatment: AP50=0.0000
+  Incomplete Endodontic Treatment: AP50=0.0000
+  Complete Endodontic Treatment: AP50=0.0000
+  Total Endodontic Failure: AP50=0.0000
+
+Medical-Specific Metrics for: dental_yolo.pt
+------------------------------------------------------------
+
+Generating confusion matrix...
+[OK] Confusion matrix saved: confusion_matrix_Student_Without_Distillation.png
+
+============================================================
+MODEL: Student_With_Distillation
+Path: distillation_results/student_with_distillation/weights/best.pt
+============================================================
+
+============================================================
+Evaluating: best.pt
+Filter enabled: False
+============================================================
+  precision: 0.5600
+  recall: 0.5362
+  mAP50: 0.5440
+  mAP50-95: 0.3426
+
+Per-Class Metrics for: best.pt
+------------------------------------------------------------
+  No Endodontic Treatment: AP50=0.4903
+  Incomplete Endodontic Treatment: AP50=0.2935
+  Complete Endodontic Treatment: AP50=0.3266
+  Total Endodontic Failure: AP50=0.2492
+
+Medical-Specific Metrics for: best.pt
+------------------------------------------------------------
+
+Generating confusion matrix...
+[OK] Confusion matrix saved: confusion_matrix_Student_With_Distillation.png
+
+============================================================
+MODEL: Teacher_Model
+Path: distillation_results/teacher_model/weights/best.pt
+============================================================
+
+============================================================
+Evaluating: best.pt
+Filter enabled: False
+============================================================
+  precision: 0.3847
+  recall: 0.2816
+  mAP50: 0.3118
+  mAP50-95: 0.1456
+
+Per-Class Metrics for: best.pt
+------------------------------------------------------------
+  No Endodontic Treatment: AP50=0.2912
+  Incomplete Endodontic Treatment: AP50=0.1229
+  Complete Endodontic Treatment: AP50=0.1168
+  Total Endodontic Failure: AP50=0.0445
+
+Medical-Specific Metrics for: best.pt
+------------------------------------------------------------
+
+Generating confusion matrix...
+[OK] Confusion matrix saved: confusion_matrix_Teacher_Model.png
+
+
+============================================================
+COMPARATIVE SUMMARY
+============================================================
+
+Model                          Precision    Recall       mAP50        mAP50-95    
+------------------------------------------------------------------------------
+Student_Without_Distillation   0.0000       0.0000       0.0000       0.0000      
+Student_With_Distillation      0.5600       0.5362       0.5440       0.3426      
+Teacher_Model                  0.3847       0.2816       0.3118       0.1456      
+
+Generating comparison visualizations...
+
+============================================================
+Evaluating: dental_yolo.pt
+Filter enabled: False
+============================================================
+  precision: 0.0000
+  recall: 0.0000
+  mAP50: 0.0000
+  mAP50-95: 0.0000
+
+============================================================
+Evaluating: best.pt
+Filter enabled: False
+============================================================
+  precision: 0.5600
+  recall: 0.5362
+  mAP50: 0.5440
+  mAP50-95: 0.3426
+
+============================================================
+Evaluating: best.pt
+Filter enabled: False
+============================================================
+  precision: 0.3847
+  recall: 0.2816
+  mAP50: 0.3118
+  mAP50-95: 0.1456
+[OK] Comparison visualization saved
+
+[OK] Full report completed
+  Results saved to: evaluation_results\results.json

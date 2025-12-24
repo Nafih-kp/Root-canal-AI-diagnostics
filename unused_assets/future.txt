@@ -26,28 +26,45 @@ CURRENTLY IMPLEMENTED:
   - API endpoint for detection with automatic filtering
   - React frontend for image upload and visualization
 
-WHAT NEEDS TO BE ADDED (Future Work):
-1. Advanced Distillation Loss
-   - Implement custom training loop with KL Divergence loss
-   - Soft target knowledge transfer (currently using hard labels via standard training)
+✅ Advanced Explainability (Grad-CAM)
+  - Gradient-weighted Class Activation Mapping
+  - Interactive heatmaps in UI
 
-2. Ensemble Methods
-   - Combine predictions from multiple models (Teacher + Student, or multiple Students)
-   - Voting mechanism or weighted averaging for higher confidence
 
-3. Cross-Validation
-   - K-Fold cross-validation for more robust performance estimation (crucial for medical data)
+WHAT NEEDS TO BE ADDED (Future Work - For Maximum Precision):
+1. Hierarchical Knowledge Distillation (The "Model Ladder")
+   - Implement multi-stage distillation: Base (Grounded SAM) -> Intermediate (YOLOv8) -> Target (YOLOv5).
+   - Use YOLOv5 as the final target model (proven superior precision on filtered dental datasets in the paper).
+   - Leverage YOLOv8 as a bridge to transfer complex feature maps to lightweight architectures.
 
-4. Clinical Validation Support
-   - Batch processing for large datasets
-   - Export reports in clinical formats (PDF/DICOM integration)
+2. Grounded SAM (GSAM) Labeling Integration
+   - Use Grounded SAM for automated, high-fidelity bounding box generation.
+   - Refine existing dataset labels to reach the "Super-Teacher" quality required for 99% precision.
 
-5. Feature Fusion Strategies
-   - Combine raw X-ray features with Contourlet-enhanced features
-   - Improve detection of subtle root canal failures
-   - Multi-stream network architecture
+3. Advanced Distillation Loss & Hyperparameter Tuning
+   - Implement custom KL-Divergence loss with optimized parameters:
+     * Alpha (α) = 0.7: High weight on detection task stability.
+     * Temperature (T) = 4.0: Optimized softening of logit probabilities for dental pathology.
+   - Contrastive Distillation: Explore feature-based distillation in addition to logit-based.
 
-6. Advanced Explainability (Grad-CAM)
-   - Implement Gradient-weighted Class Activation Mapping
-   - Visualize model focus areas for "Trust & Interpretability"
-   - Debugging tool for False Positives (e.g., bone shadows vs real fractures)
+4. Multi-Filter Fusion (Advanced Preprocessing)
+   - Implement "Filter Fusion": Combining Contourlet Transform with Bayesian and Non-local filters.
+   - Multi-stream input: Passing different filtered versions of the same image to extract diverse spatial features.
+
+5. Ensemble & Voting Mechanisms
+   - Implement a post-processing ensemble (e.g., Weighted Boxes Fusion) between the Teacher (v8m) and Distilled Student (v5n).
+   - Use cross-model consensus to filter out false positives in "Incomplete Treatment" cases.
+
+6. Alternative High-Precision Architectures:
+   - YOLOv5 (Target): Primary focus for the next iteration based on paper findings.
+   - Faster R-CNN/RetinaNet: Retain for comparative benchmarking of small lesion detection limits.
+   - U-Net Integration: Transition to pixel-level segmentation for measuring exact treatment depth.
+
+7. Clinical Robustness & Validation:
+   - 5-Fold Cross-Validation: Essential for medical-grade reliability assessment.
+   - Statistical Significance Testing (t-tests) to validate precision gains.
+   - Export clinical reports in DICOM/PDF formats.
+
+
+
+

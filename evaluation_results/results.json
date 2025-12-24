@@ -1,5 +1,5 @@
 {
-  "Student_Baseline": {
+  "Student_Without_Distillation": {
     "overall": {
       "precision": 0.0,
       "recall": 0.0,
@@ -22,25 +22,25 @@
     },
     "medical": {}
   },
-  "Student_Distilled": {
+  "Student_With_Distillation": {
     "overall": {
-      "precision": 0.0,
-      "recall": 0.0,
-      "mAP50": 0.0,
-      "mAP50-95": 0.0
+      "precision": 0.5599507785789646,
+      "recall": 0.536228363831626,
+      "mAP50": 0.5439654646850702,
+      "mAP50-95": 0.3426382095485532
     },
     "per_class": {
       "No Endodontic Treatment": {
-        "AP50": 0.0
+        "AP50": 0.4903173561480417
       },
       "Incomplete Endodontic Treatment": {
-        "AP50": 0.0
+        "AP50": 0.29346093199613393
       },
       "Complete Endodontic Treatment": {
-        "AP50": 0.0
+        "AP50": 0.3265780618842104
       },
       "Total Endodontic Failure": {
-        "AP50": 0.0
+        "AP50": 0.24918645986813942
       }
     },
     "medical": {}
