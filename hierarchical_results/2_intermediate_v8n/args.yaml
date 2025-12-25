@@ -103,4 +103,4 @@ auto_augment: randaugment
 erasing: 0.4
 cfg: null
 tracker: botsort.yaml
-save_dir: /content/drive/MyDrive/Root-Canal-AI2/Root-canal-AI-diagnostics/hierarchical_results/2_intermediate_v8n
+save_dir: /content/drive/My Drive/Root-Canal-AI2/Root-canal-AI-diagnostics/hierarchical_results/2_intermediate_v8n

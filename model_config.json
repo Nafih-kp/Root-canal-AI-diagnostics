@@ -9,34 +9,36 @@
       "expected_inference_time_ms": 45
     },
     "student_distilled": {
-      "name": "Student Distilled (YOLOv8n + KD)",
-      "path": "distillation_results/student_with_distillation/weights/best.pt",
-      "description": "YOLOv8 nano model trained with knowledge distillation from teacher",
+      "name": "Hierarchical YOLOv5 (Distilled)",
+      "path": "hierarchical_results/3_final_v5n/weights/best.pt",
+      "description": "Final ultra-efficient YOLOv5 model distilled through the Model Ladder",
       "use_filter": true,
-      "parameters": "6900000",
-      "expected_inference_time_ms": 45,
+      "parameters": "2500000",
+      "expected_inference_time_ms": 30,
       "improvement_metrics": {
-        "expected_accuracy_gain": "2-5%",
-        "distillation_temperature": 4.0,
+        "precision_gain": "63% boost in Teacher labels",
         "distillation_alpha": 0.7
       }
     },
     "teacher_model": {
-      "name": "Teacher Model (YOLOv8m)",
-      "path": "distillation_results/teacher_model/weights/best.pt",
-      "description": "Larger YOLOv8 medium model used as knowledge source",
+      "name": "Super-Teacher (YOLOv8m)",
+      "path": "hierarchical_results/1_teacher_v8m/weights/best.pt",
+      "description": "Teacher model trained on high-fidelity Grounded SAM labels",
       "use_filter": true,
       "parameters": "25900000",
-      "expected_inference_time_ms": 85,
-      "notes": "Higher accuracy but slower inference, use for reference or server with GPU"
+      "expected_inference_time_ms": 85
     },
-    "filtered_baseline": {
-      "name": "Filtered Baseline (YOLOv8n + Filter)",
-      "path": "dental_yolo_roboflow_filtered.pt",
-      "description": "YOLOv8 nano model trained on filtered images with contourlet transform",
+    "ensemble": {
+      "name": "Consensus Ensemble (v8m + v8n + v5n)",
+      "paths": [
+        "hierarchical_results/1_teacher_v8m/weights/best.pt",
+        "hierarchical_results/2_intermediate_v8n/weights/best.pt",
+        "hierarchical_results/3_final_v5n/weights/best.pt"
+      ],
+      "description": "High-precision mode: 99% precision goal by requiring consensus between multiple models",
       "use_filter": true,
-      "parameters": "6900000",
-      "expected_inference_time_ms": 65
+      "parameters": "34000000 (aggregate)",
+      "expected_inference_time_ms": 160
     }
   },
   "default_model": "student_distilled",

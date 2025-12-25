@@ -11,6 +11,7 @@ import ultralytics
 from ultralytics import YOLO
 from contourlet_filter import ContourletTransform
 from grad_cam import YOLOGradCAM, overlay_heatmap
+from ensemble_detection import MedicalEnsemble
 import json
 from pathlib import Path
 
@@ -30,6 +31,7 @@ model_path = model_specs.get(default_model_name, {}).get('path', 'dental_yolo_ro
 use_filter = config.get('preprocessing', {}).get('contourlet_enabled', True)
 
 model = None
+ensemble = None
 contourlet_filter = None
 
 class_names = [
@@ -40,7 +42,21 @@ class_names = [
 ]
 
 def load_model():
-    global model
+    global model, ensemble
+    
+    # Check if we need ensemble
+    if default_model_name == 'ensemble':
+        if ensemble is None:
+            paths = model_specs.get('ensemble', {}).get('paths', [])
+            try:
+                ensemble = MedicalEnsemble(paths)
+                print("✓ Medical Ensemble loaded successfully")
+            except Exception as e:
+                print(f"✗ Error loading ensemble: {e}")
+                return False
+        return True
+    
+    # Regular model
     if model is None:
         try:
             model = YOLO(model_path)
@@ -128,11 +144,12 @@ def switch_model(model_name):
     
     try:
         model = None
+        ensemble = None # Reset both
         model_path = new_model_path
         default_model_name = model_name
         
         if not load_model():
-            return jsonify({"error": "Failed to load new model"}), 500
+            return jsonify({"error": "Failed to load new model/ensemble"}), 500
         
         if use_filter and not load_filter():
             print("⚠️  Filter initialization failed, continuing without filter")
@@ -214,41 +231,44 @@ def detect():
         # Run inference
         try:
             print(f"Running inference on image shape: {img_array.shape}")
-            results = model.predict(img_array, conf=0.25)
-            print(f"✓ Inference completed, processing results")
+            if default_model_name == 'ensemble':
+                # Ensemble uses MedicalEnsemble.predict
+                results_raw = ensemble.predict(img_array, conf=0.45)
+                # Convert list of lists to detection dicts immediately
+                detections = []
+                for box in results_raw:
+                    detections.append({
+                        "bbox": [float(box[0]), float(box[1]), float(box[2]), float(box[3])],
+                        "confidence": float(box[4]),
+                        "class": class_names[int(box[5])] if int(box[5]) < len(class_names) else f"class_{int(box[5])}",
+                        "class_id": int(box[5])
+                    })
+                # For Grad-CAM, we use the teacher model (usually first in ensemble)
+                inference_res = ensemble.models[0].predict(img_array, conf=0.45)
+            else:
+                inference_res = model.predict(img_array, conf=0.25)
+                # results will be processed in the next step
+                detections = None
+            print(f"✓ Inference completed")
         except Exception as e:
             print(f"✗ Inference error: {e}")
             import traceback
             traceback.print_exc()
-            return jsonify({"error": f"YOLO inference failed: {str(e)}"}), 500
+            return jsonify({"error": f"Inference failed: {str(e)}"}), 500
         
         # --- GRAD-CAM GENERATION ---
         heatmap_base64 = None
         try:
-            # Check if user requested explainability
-            # data was loaded earlier from request.get_json()
             raw_enable_gradcam = data.get('enable_gradcam')
             use_gradcam = raw_enable_gradcam is True or str(raw_enable_gradcam).lower() == 'true'
             
-            print(f"DEBUG: raw_enable_gradcam={raw_enable_gradcam}, use_gradcam={use_gradcam}")
-
             if use_gradcam:
-                 # Initialize Grad-CAM
-                # Note: creating a new hook per request is inefficient for prod, 
-                # but fine for this demo. Ideally, initialize once.
-                
                 print("DEBUG: Initializing YOLOGradCAM...")
-                # We need to preprocess the image manually for Grad-CAM input
-                # YOLOv8 preprocessing: resize to 640, normalize 0-1, CHW format
+                # Use teacher model for heatmaps if in ensemble
+                active_model = ensemble.models[0] if default_model_name == 'ensemble' else model
+                target_layer = active_model.model.model[-2]
                 
-                # Use Ultralytics internal transform if possible, or manual
-                target_layers = [model.model.model[-2]] # Default fallback
-                try:
-                    grad_cam = YOLOGradCAM(model, target_layers[0])
-                    print("DEBUG: YOLOGradCAM initialized.")
-                except Exception as e:
-                    print(f"DEBUG: Failed to init YOLOGradCAM: {e}")
-                    grad_cam = None
+                grad_cam = YOLOGradCAM(active_model, target_layer)
 
                 if grad_cam:
                     # Resize for model input (640x640 is standard for YOLOv8)
@@ -281,29 +301,26 @@ def detect():
             import traceback
             traceback.print_exc()
 
-        # Process results
-        detections = []
-        try:
-            for result in results:
-                boxes = result.boxes
-                for box in boxes:
-                    # Get bounding box coordinates
-                    x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
-                    conf = float(box.conf[0].cpu().numpy())
-                    cls_id = int(box.cls[0].cpu().numpy())
-
-                    # Map class ID to name
-                    class_name = class_names[cls_id] if cls_id < len(class_names) else f"class_{cls_id}"
-
-                    detections.append({
-                        "bbox": [float(x1), float(y1), float(x2), float(y2)],
-                        "confidence": conf,
-                        "class": class_name,
-                        "class_id": cls_id
-                    })
-        except Exception as e:
-            print(f"✗ Result processing error: {e}")
-            return jsonify({"error": f"Failed to process results: {str(e)}"}), 500
+        # Process results (only if not already processed by ensemble)
+        if detections is None:
+            detections = []
+            try:
+                for result in inference_res:
+                    boxes = result.boxes
+                    for box in boxes:
+                        x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
+                        conf = float(box.conf[0].cpu().numpy())
+                        cls_id = int(box.cls[0].cpu().numpy())
+                        class_name = class_names[cls_id] if cls_id < len(class_names) else f"class_{cls_id}"
+                        detections.append({
+                            "bbox": [float(x1), float(y1), float(x2), float(y2)],
+                            "confidence": conf,
+                            "class": class_name,
+                            "class_id": cls_id
+                        })
+            except Exception as e:
+                print(f"✗ Result processing error: {e}")
+                return jsonify({"error": f"Failed to process results: {str(e)}"}), 500
 
         print(f"✓ Detection completed: {len(detections)} objects detected")
         return jsonify({
